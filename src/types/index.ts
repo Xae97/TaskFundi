@@ -13,6 +13,7 @@ export interface User {
   skills?: string;
   rating?: number;
   reviews?: Review[];
+  isRemoteAvailable?: boolean;
 }
 
 export interface Service {
@@ -73,4 +74,5 @@ export interface JobPost {
   status: 'open' | 'assigned' | 'in-progress' | 'completed';
   createdAt: Date;
   requiredSkills: string[];
+  isRemote: boolean;
 }

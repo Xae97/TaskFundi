@@ -1,17 +1,21 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { MainTabParamList, RootStackParamList } from './types';
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { ClientFundiScreen } from '../screens/ClientFundiScreen';
-import { FundiHomeScreen } from '../screens/FundiHomeScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { MainTabParamList } from './types';
+import { CreateJobScreen } from '../screens/CreateJobScreen';
+import { JobDetailsScreen } from '../screens/JobDetailsScreen';
 import { useAuth } from '../context/AuthContext';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export function TabNavigator() {
+function MainTabs() {
   const { user } = useAuth();
+  const isClient = user?.role === 'client';
 
   return (
     <Tab.Navigator
@@ -19,18 +23,10 @@ export function TabNavigator() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: '#fff',
-          borderTopWidth: 1,
           borderTopColor: '#f0f0f0',
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 60,
         },
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#999',
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-        }
       }}
     >
       <Tab.Screen
@@ -38,7 +34,7 @@ export function TabNavigator() {
         component={DashboardScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid-outline" size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
@@ -46,10 +42,14 @@ export function TabNavigator() {
         name="Fundi"
         component={ClientFundiScreen}
         options={{
+          title: isClient ? 'Find Fundi' : 'Jobs',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="construct-outline" size={size} color={color} />
+            <Ionicons
+              name={isClient ? 'search-outline' : 'briefcase-outline'}
+              size={size}
+              color={color}
+            />
           ),
-          tabBarLabel: user?.role === 'client' ? 'Find & Hire' : 'My Jobs',
         }}
       />
       <Tab.Screen
@@ -62,5 +62,33 @@ export function TabNavigator() {
         }}
       />
     </Tab.Navigator>
+  );
+}
+
+export function TabNavigator() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="MainTabs" component={MainTabs} />
+      <Stack.Screen 
+        name="CreateJob" 
+        component={CreateJobScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: true,
+          headerTitle: 'Create New Job',
+        }}
+      />
+      <Stack.Screen 
+        name="JobDetails" 
+        component={JobDetailsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
   );
 }

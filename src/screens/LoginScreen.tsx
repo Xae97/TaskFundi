@@ -31,11 +31,12 @@ const loginSchema = Yup.object().shape({
 export function LoginScreen({ navigation }: Props) {
   const { signIn } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<'client' | 'fundi'>('client');
 
   const handleLogin = async (values: { email: string; password: string }) => {
     try {
       setError(null);
-      await signIn(values.email, values.password);
+      await signIn(values.email, values.password, selectedRole);
     } catch (err) {
       setError('Invalid email or password. Please try again.');
       console.error('Login error:', err);
@@ -61,6 +62,33 @@ export function LoginScreen({ navigation }: Props) {
           </View>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to continue to TaskFundi</Text>
+        </View>
+
+        <View style={styles.roleToggleContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.roleButton,
+              selectedRole === 'client' && styles.roleButtonActive
+            ]}
+            onPress={() => setSelectedRole('client')}
+          >
+            <Text style={[
+              styles.roleButtonText,
+              selectedRole === 'client' && styles.roleButtonTextActive
+            ]}>As Client</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[
+              styles.roleButton,
+              selectedRole === 'fundi' && styles.roleButtonActive
+            ]}
+            onPress={() => setSelectedRole('fundi')}
+          >
+            <Text style={[
+              styles.roleButtonText,
+              selectedRole === 'fundi' && styles.roleButtonTextActive
+            ]}>As Fundi</Text>
+          </TouchableOpacity>
         </View>
 
         <Formik
@@ -217,5 +245,38 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     color: '#007AFF',
     fontSize: 14,
+  },
+  roleToggleContainer: {
+    flexDirection: 'row',
+    marginBottom: 24,
+    padding: 4,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+  },
+  roleButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  roleButtonActive: {
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  roleButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  roleButtonTextActive: {
+    color: '#007AFF',
   },
 });

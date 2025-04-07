@@ -5,7 +5,7 @@ import { User, UserRole } from '../types';
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, loginRole?: UserRole) => Promise<void>;
   signUp: (userData: {
     name: string;
     email: string;
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, loginRole?: UserRole) => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
@@ -100,10 +100,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Invalid credentials');
     }
 
-    // Remove password before storing
-    const { password: _, ...userWithoutPassword } = foundUser;
-    await AsyncStorage.setItem('user', JSON.stringify(userWithoutPassword));
-    setUser(userWithoutPassword);
+    // If user is a fundi and loginRole is specified, allow them to login as either role
+    if (foundUser.role === 'fundi' && loginRole) {
+      const userToStore = {
+        ...foundUser,
+        role: loginRole // Override the role for this session
+      };
+      delete userToStore.password;
+      await AsyncStorage.setItem('user', JSON.stringify(userToStore));
+      setUser(userToStore);
+    } else {
+      // Regular login with user's default role
+      const { password: _, ...userWithoutPassword } = foundUser;
+      await AsyncStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      setUser(userWithoutPassword);
+    }
   };
 
   const signUp = async (userData: {

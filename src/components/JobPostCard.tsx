@@ -1,170 +1,198 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { JobPost } from '../types';
+import { theme } from '../theme';
 
 interface Props {
-  jobPost: JobPost;
+  title: string;
+  description: string;
+  location: string;
+  price: string;
+  category: string;
+  requiredSkills: string[];
+  isRemote: boolean;
   onPress: () => void;
 }
 
-export function JobPostCard({ jobPost, onPress }: Props) {
+export function JobPostCard({
+  title,
+  description,
+  location,
+  price,
+  category,
+  requiredSkills,
+  isRemote,
+  onPress,
+}: Props) {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity 
+      style={styles.container}
+      onPress={onPress}
+    >
       <View style={styles.header}>
-        <Text style={styles.title}>{jobPost.title}</Text>
-        <View style={styles.budgetContainer}>
-          <Text style={styles.budget}>
-            {jobPost.budget.currency} {jobPost.budget.amount}
-          </Text>
+        <View style={styles.categoryBadge}>
+          <Text style={styles.categoryText}>{category}</Text>
         </View>
+        <Text style={styles.price}>KSh {price}</Text>
       </View>
 
+      <Text style={styles.title}>{title}</Text>
+      
       <Text style={styles.description} numberOfLines={2}>
-        {jobPost.description}
+        {description}
       </Text>
 
+      <View style={styles.locationContainer}>
+        {isRemote ? (
+          <>
+            <Ionicons name="globe-outline" size={16} color={theme.colors.accent} />
+            <Text style={[styles.locationText, styles.remoteText]}>Remote Work</Text>
+          </>
+        ) : (
+          <>
+            <Ionicons name="location-outline" size={16} color={theme.colors.earth.terracotta} />
+            <Text style={styles.locationText} numberOfLines={1}>
+              {location}
+            </Text>
+          </>
+        )}
+      </View>
+
+      <View style={styles.skillsContainer}>
+        {requiredSkills.map((skill, index) => (
+          <View key={index} style={styles.skillBadge}>
+            <Text style={styles.skillText}>{skill}</Text>
+          </View>
+        ))}
+      </View>
+
       <View style={styles.footer}>
-        <View style={styles.locationContainer}>
-          <Ionicons name="location-outline" size={16} color="#666" />
-          <Text style={styles.location}>{jobPost.location.address}</Text>
+        <View style={styles.postedContainer}>
+          <Ionicons name="time-outline" size={14} color={theme.colors.text.secondary} />
+          <Text style={styles.postedText}>Posted today</Text>
         </View>
-        
-        <View style={styles.skillsContainer}>
-          {jobPost.requiredSkills.slice(0, 2).map((skill, index) => (
-            <View key={index} style={styles.skillBadge}>
-              <Text style={styles.skillText}>{skill}</Text>
-            </View>
-          ))}
-          {jobPost.requiredSkills.length > 2 && (
-            <Text style={styles.moreSkills}>+{jobPost.requiredSkills.length - 2}</Text>
-          )}
+        <View style={styles.viewDetailsButton}>
+          <Text style={styles.viewDetailsText}>View Details</Text>
+          <Ionicons name="arrow-forward" size={16} color={theme.colors.primary} />
         </View>
       </View>
 
-      <View style={styles.statusContainer}>
-        <View style={[styles.statusBadge, styles[`status_${jobPost.status}`]]}>
-          <Text style={styles.statusText}>{jobPost.status}</Text>
-        </View>
-        <Text style={styles.date}>
-          {new Date(jobPost.createdAt).toLocaleDateString()}
-        </Text>
-      </View>
+      <View style={styles.decorativePattern} />
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+    ...theme.elevation.small,
+    position: 'relative',
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: theme.spacing.md,
+  },
+  categoryBadge: {
+    backgroundColor: theme.colors.primary + '15',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.large,
+  },
+  categoryText: {
+    color: theme.colors.primary,
+    fontSize: theme.typography.sizes.caption,
+    fontWeight: '500',
+  },
+  price: {
+    fontSize: theme.typography.sizes.body,
+    fontWeight: '600',
+    color: theme.colors.earth.coffee,
   },
   title: {
-    fontSize: 18,
+    fontSize: theme.typography.sizes.h4,
     fontWeight: '600',
-    color: '#333',
-    flex: 1,
-    marginRight: 8,
-  },
-  budgetContainer: {
-    backgroundColor: '#f0f8ff',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  budget: {
-    color: '#007AFF',
-    fontWeight: '600',
-    fontSize: 16,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.sm,
   },
   description: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
+    fontSize: theme.typography.sizes.body,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing.md,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  locationText: {
+    fontSize: theme.typography.sizes.small,
+    color: theme.colors.text.secondary,
+    marginLeft: theme.spacing.xs,
+    flex: 1,
+  },
+  remoteText: {
+    color: theme.colors.accent,
+    fontWeight: '600',
+  },
+  skillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: theme.spacing.md,
+  },
+  skillBadge: {
+    backgroundColor: theme.colors.earth.clay + '15',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.large,
+    marginRight: theme.spacing.xs,
+    marginBottom: theme.spacing.xs,
+  },
+  skillText: {
+    fontSize: theme.typography.sizes.caption,
+    color: theme.colors.earth.clay,
+    fontWeight: '500',
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  location: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 4,
-  },
-  skillsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  skillBadge: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginLeft: 4,
-  },
-  skillText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  moreSkills: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 4,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 12,
+    paddingTop: theme.spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: theme.colors.background,
   },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+  postedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  status_open: {
-    backgroundColor: '#e8f5e9',
+  postedText: {
+    fontSize: theme.typography.sizes.small,
+    color: theme.colors.text.secondary,
+    marginLeft: theme.spacing.xs,
   },
-  status_assigned: {
-    backgroundColor: '#fff3e0',
+  viewDetailsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  status_in_progress: {
-    backgroundColor: '#e3f2fd',
-  },
-  status_completed: {
-    backgroundColor: '#f5f5f5',
-  },
-  statusText: {
-    fontSize: 12,
+  viewDetailsText: {
+    fontSize: theme.typography.sizes.small,
+    color: theme.colors.primary,
     fontWeight: '500',
-    textTransform: 'capitalize',
+    marginRight: theme.spacing.xs,
   },
-  date: {
-    fontSize: 12,
-    color: '#999',
+  decorativePattern: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 120,
+    height: 120,
+    opacity: 0.05,
+    backgroundColor: theme.colors.primary,
+    transform: [{ rotate: '45deg' }, { translateX: 60 }, { translateY: -60 }],
   },
 });
