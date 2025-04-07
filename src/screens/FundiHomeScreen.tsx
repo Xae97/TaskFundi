@@ -38,6 +38,13 @@ export function FundiHomeScreen() {
     applyFilters(allJobs, activeFilter, showRemoteOnly);
   }, [activeFilter, showRemoteOnly]);
 
+  // Handle refresh
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    loadJobs();
+    setRefreshing(false);
+  }, [loadJobs]);
+
   // Initial load
   useEffect(() => {
     loadJobs();

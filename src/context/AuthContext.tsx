@@ -17,6 +17,8 @@ interface AuthContextType {
   }) => Promise<void>;
   signOut: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
+  switchUserRole: () => Promise<void>;
+  originalRole: UserRole | null;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -56,6 +58,7 @@ const REGISTERED_USERS_KEY = 'registered_users';
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [originalRole, setOriginalRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
     loadUser();
@@ -102,11 +105,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // If user is a fundi and loginRole is specified, allow them to login as either role
     if (foundUser.role === 'fundi' && loginRole) {
-      const userToStore = {
+      const { password, ...userToStore } = {
         ...foundUser,
         role: loginRole // Override the role for this session
       };
-      delete userToStore.password;
       await AsyncStorage.setItem('user', JSON.stringify(userToStore));
       setUser(userToStore);
     } else {
@@ -185,6 +187,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Password reset email sent to:', email);
   };
 
+  const switchUserRole = async () => {
+    if (!user) return;
+    
+    // If we haven't stored the original role yet, store it
+    if (!originalRole) {
+      setOriginalRole(user.role);
+    }
+    
+    // Switch between fundi and client roles
+    const newRole = user.role === 'fundi' ? 'client' : 'fundi';
+    
+    // Create updated user with new role
+    const updatedUser: User = {
+      ...user,
+      role: newRole
+    };
+    
+    // Save updated user to storage
+    await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -192,7 +216,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signIn, 
       signUp, 
       signOut,
-      forgotPassword 
+      forgotPassword,
+      switchUserRole,
+      originalRole
     }}>
       {children}
     </AuthContext.Provider>

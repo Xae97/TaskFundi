@@ -4,6 +4,7 @@ import { UserRole } from '../types';
 export type MainTabParamList = {
   Dashboard: undefined;
   Fundi: undefined;
+  Chat: undefined;
   Profile: undefined;
 };
 
@@ -22,4 +23,8 @@ export type RootStackParamList = {
     jobId: string;
   };
   CreateJob: undefined;
+  ChatDetail: {
+    conversationId: string;
+  };
+  ChatList: undefined;
 };

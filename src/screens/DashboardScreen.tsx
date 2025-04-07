@@ -8,6 +8,7 @@ import { jobService } from '../services/JobService';
 import { JobPost } from '../types';
 import { theme } from '../theme';
 import { RootStackParamList } from '../navigation/types';
+import { Header } from '../components/Header';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -78,147 +79,151 @@ export function DashboardScreen() {
   );
 
   return (
-    <ScrollView 
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <View style={styles.header}>
-        <View>
+    <View style={styles.container}>
+      <Header 
+        title={isClient ? "Dashboard" : "Your Tasks"} 
+        rightIcon="notifications-outline"
+        onRightPress={() => {}} 
+        variant="large"
+        showLogo={true}
+      />
+      
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.userSection}>
           <Text style={styles.welcomeText}>Welcome back,</Text>
           <Text style={styles.nameText}>{user?.name}</Text>
         </View>
-        <TouchableOpacity style={styles.notificationButton}>
-          <View style={styles.notificationBadge}>
-            <Text style={styles.notificationCount}>2</Text>
-          </View>
-          <Ionicons 
-            name="notifications-outline" 
-            size={24} 
-            color={theme.colors.text.primary} 
-          />
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.statsContainer}>
-        <View style={[styles.statCard, styles.primaryStat]}>
-          <View style={styles.statHeader}>
-            <View>
-              <Text style={styles.statLabel}>Active {isClient ? 'Jobs' : 'Tasks'}</Text>
-              <Text style={styles.statValue}>{activeJobs}</Text>
+        <View style={styles.statsContainer}>
+          <View style={[styles.statCard, styles.primaryStat]}>
+            <View style={styles.statHeader}>
+              <View>
+                <Text style={styles.statLabel}>Active {isClient ? 'Jobs' : 'Tasks'}</Text>
+                <Text style={styles.statValue}>{activeJobs}</Text>
+              </View>
+              <View style={styles.iconContainer}>
+                <Ionicons 
+                  name={isClient ? "briefcase" : "hammer"} 
+                  size={32} 
+                  color={theme.colors.primary} 
+                />
+              </View>
             </View>
-            <View style={styles.iconContainer}>
-              <Ionicons 
-                name={isClient ? "briefcase" : "hammer"} 
-                size={32} 
-                color={theme.colors.primary} 
-              />
+            <View style={styles.progressBar}>
+              <View style={[
+                styles.progressFill,
+                { width: totalJobs > 0 ? `${(activeJobs / totalJobs) * 100}%` : '0%' }
+              ]} />
             </View>
-          </View>
-          <View style={styles.progressBar}>
-            <View style={[
-              styles.progressFill,
-              { width: totalJobs > 0 ? `${(activeJobs / totalJobs) * 100}%` : '0%' }
-            ]} />
-          </View>
-          <Text style={styles.progressText}>
-            {activeJobs} of {totalJobs} total {isClient ? 'jobs' : 'tasks'}
-          </Text>
-          <View style={styles.patternOverlay} />
-        </View>
-
-        <View style={styles.secondaryStats}>
-          <View style={styles.statCard}>
-            <View style={styles.secondaryStatContent}>
-              <Ionicons name="checkmark-circle" size={24} color={theme.colors.success} />
-              <Text style={styles.secondaryStatValue}>{completedJobs}</Text>
-              <Text style={styles.secondaryStatLabel}>Completed</Text>
-            </View>
-          </View>
-
-          <View style={styles.statCard}>
-            <View style={styles.secondaryStatContent}>
-              <Ionicons name="star" size={24} color={theme.colors.accent} />
-              <Text style={styles.secondaryStatValue}>4.8</Text>
-              <Text style={styles.secondaryStatLabel}>Rating</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('MainTabs', { screen: 'Fundi' })}>
-            <Text style={styles.seeAllText}>See all</Text>
-          </TouchableOpacity>
-        </View>
-
-        {recentJobs.length > 0 ? (
-          <View style={styles.jobsList}>
-            {recentJobs.map(renderJobCard)}
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            <View style={styles.emptyStateIcon}>
-              <Ionicons name="documents-outline" size={48} color={theme.colors.text.muted} />
-            </View>
-            <Text style={styles.emptyStateTitle}>No recent activity</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {isClient 
-                ? 'Start by posting a job or finding a service provider'
-                : 'Start by browsing available jobs'}
+            <Text style={styles.progressText}>
+              {activeJobs} of {totalJobs} total {isClient ? 'jobs' : 'tasks'}
             </Text>
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={() => navigation.navigate('MainTabs', { screen: 'Fundi' })}
-            >
-              <Text style={styles.actionButtonText}>
-                {isClient ? 'Post a Job' : 'Find Jobs'}
-              </Text>
-              <Ionicons name="arrow-forward" size={20} color={theme.colors.surface} />
+            <View style={styles.patternOverlay} />
+          </View>
+
+          <View style={styles.secondaryStats}>
+            <View style={styles.statCard}>
+              <View style={styles.secondaryStatContent}>
+                <Ionicons name="checkmark-circle" size={24} color={theme.colors.success} />
+                <Text style={styles.secondaryStatValue}>{completedJobs}</Text>
+                <Text style={styles.secondaryStatLabel}>Completed</Text>
+              </View>
+            </View>
+
+            <View style={styles.statCard}>
+              <View style={styles.secondaryStatContent}>
+                <Ionicons name="star" size={24} color={theme.colors.accent} />
+                <Text style={styles.secondaryStatValue}>4.8</Text>
+                <Text style={styles.secondaryStatLabel}>Rating</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent Activity</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('MainTabs', { screen: 'Fundi' })}>
+              <Text style={styles.seeAllText}>See all</Text>
             </TouchableOpacity>
           </View>
-        )}
-      </View>
 
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          {recentJobs.length > 0 ? (
+            <View style={styles.jobsList}>
+              {recentJobs.map(renderJobCard)}
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyStateIcon}>
+                <Ionicons name="documents-outline" size={48} color={theme.colors.text.muted} />
+              </View>
+              <Text style={styles.emptyStateTitle}>No recent activity</Text>
+              <Text style={styles.emptyStateSubtext}>
+                {isClient 
+                  ? 'Start by posting a job or finding a service provider'
+                  : 'Start by browsing available jobs'}
+              </Text>
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('MainTabs', { screen: 'Fundi' })}
+              >
+                <Text style={styles.actionButtonText}>
+                  {isClient ? 'Post a Job' : 'Find Jobs'}
+                </Text>
+                <Ionicons name="arrow-forward" size={20} color={theme.colors.surface} />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
-        <View style={styles.quickActions}>
-          <TouchableOpacity 
-            style={styles.quickActionButton}
-            onPress={() => navigation.navigate('MainTabs', { screen: 'Fundi' })}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: theme.colors.primary + '15' }]}>
-              <Ionicons 
-                name={isClient ? "search" : "briefcase"} 
-                size={24} 
-                color={theme.colors.primary} 
-              />
-            </View>
-            <Text style={styles.quickActionText}>{isClient ? 'Find Fundi' : 'Browse Jobs'}</Text>
-          </TouchableOpacity>
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
+          </View>
 
-          <TouchableOpacity style={styles.quickActionButton}>
-            <View style={[styles.quickActionIcon, { backgroundColor: theme.colors.accent + '15' }]}>
-              <Ionicons name="chatbubbles" size={24} color={theme.colors.accent} />
-            </View>
-            <Text style={styles.quickActionText}>Messages</Text>
-          </TouchableOpacity>
+          <View style={styles.quickActions}>
+            <TouchableOpacity 
+              style={styles.quickActionButton}
+              onPress={() => navigation.navigate('MainTabs', { screen: 'Fundi' })}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: theme.colors.primary + '15' }]}>
+                <Ionicons 
+                  name={isClient ? "search" : "briefcase"} 
+                  size={24} 
+                  color={theme.colors.primary} 
+                />
+              </View>
+              <Text style={styles.quickActionText}>{isClient ? 'Find Fundi' : 'Browse Jobs'}</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.quickActionButton}>
-            <View style={[styles.quickActionIcon, { backgroundColor: theme.colors.earth.clay + '15' }]}>
-              <Ionicons name="settings" size={24} color={theme.colors.earth.clay} />
-            </View>
-            <Text style={styles.quickActionText}>Settings</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.quickActionButton}
+              onPress={() => navigation.navigate('ChatList')}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: theme.colors.accent + '15' }]}>
+                <Ionicons name="chatbubbles" size={24} color={theme.colors.accent} />
+              </View>
+              <Text style={styles.quickActionText}>Messages</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.quickActionButton}
+              onPress={() => navigation.navigate('MainTabs', { screen: 'Profile' })}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: theme.colors.earth.clay + '15' }]}>
+                <Ionicons name="settings" size={24} color={theme.colors.earth.clay} />
+              </View>
+              <Text style={styles.quickActionText}>Settings</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -227,15 +232,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 60,
+  scrollContent: {
+    paddingBottom: theme.spacing.xl,
+  },
+  userSection: {
     paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
-    ...theme.elevation.small,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.md,
   },
   welcomeText: {
     fontSize: theme.typography.sizes.body,
@@ -243,32 +246,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   nameText: {
-    fontSize: theme.typography.sizes.h2,
+    fontSize: theme.typography.sizes.h3,
     fontWeight: 'bold',
     color: theme.colors.text.primary,
-  },
-  notificationButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: theme.colors.primary,
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  notificationCount: {
-    color: theme.colors.surface,
-    fontSize: 12,
-    fontWeight: 'bold',
   },
   statsContainer: {
     padding: theme.spacing.lg,
@@ -277,7 +257,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.lg,
-    ...theme.elevation.small,
+    ...theme.elevation.medium,
   },
   primaryStat: {
     marginBottom: theme.spacing.lg,
@@ -368,7 +348,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.lg,
-    ...theme.elevation.small,
+    ...theme.elevation.medium,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -427,7 +407,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.xl,
     alignItems: 'center',
-    ...theme.elevation.small,
+    ...theme.elevation.medium,
   },
   emptyStateIcon: {
     width: 80,
@@ -458,7 +438,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.xl,
     paddingVertical: theme.spacing.md,
     borderRadius: theme.borderRadius.large,
-    ...theme.elevation.small,
+    ...theme.elevation.medium,
   },
   actionButtonText: {
     color: theme.colors.surface,
@@ -476,7 +456,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.md,
     alignItems: 'center',
-    ...theme.elevation.small,
+    ...theme.elevation.medium,
   },
   quickActionIcon: {
     width: 48,

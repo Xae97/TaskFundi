@@ -11,6 +11,9 @@ interface Props {
 
 export function ServiceProviderCard({ provider, onPress }: Props) {
   const skills = provider.skills?.split(',').map(s => s.trim()) || [];
+  // Limit the number of skills to display to prevent overflow
+  const displaySkills = skills.slice(0, 3);
+  const hasMoreSkills = skills.length > 3;
   const initials = provider.name.split(' ').map(n => n[0]).join('').toUpperCase();
 
   return (
@@ -30,7 +33,7 @@ export function ServiceProviderCard({ provider, onPress }: Props) {
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
           <View style={styles.headerInfo}>
-            <Text style={styles.name}>{provider.name}</Text>
+            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{provider.name}</Text>
             {provider.rating && (
               <View style={styles.ratingContainer}>
                 <View style={styles.rating}>
@@ -53,18 +56,23 @@ export function ServiceProviderCard({ provider, onPress }: Props) {
 
       <View style={styles.locationContainer}>
         <Ionicons name="location-outline" size={16} color={theme.colors.text.secondary} />
-        <Text style={styles.locationText} numberOfLines={1}>
+        <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
           {provider.location.address}
         </Text>
       </View>
 
       {skills.length > 0 && (
         <View style={styles.skillsContainer}>
-          {skills.map((skill, index) => (
+          {displaySkills.map((skill, index) => (
             <View key={index} style={styles.skillBadge}>
-              <Text style={styles.skillText}>{skill}</Text>
+              <Text style={styles.skillText} numberOfLines={1} ellipsizeMode="tail">{skill}</Text>
             </View>
           ))}
+          {hasMoreSkills && (
+            <View style={styles.moreSkillsBadge}>
+              <Text style={styles.moreSkillsText}>+{skills.length - 3} more</Text>
+            </View>
+          )}
         </View>
       )}
 
@@ -104,6 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+    marginRight: theme.spacing.sm, // Add margin to prevent overflow with the verified badge
   },
   avatarContainer: {
     width: 48,
@@ -113,6 +122,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: theme.spacing.md,
+    flexShrink: 0, // Prevent avatar from shrinking
   },
   avatarText: {
     color: theme.colors.surface,
@@ -121,12 +131,13 @@ const styles = StyleSheet.create({
   },
   headerInfo: {
     flex: 1,
+    flexShrink: 1, // Allow this container to shrink
   },
   name: {
-    fontSize: theme.typography.sizes.body,
-    fontWeight: '600',
+    fontSize: theme.typography.sizes.h4,
+    fontWeight: 'bold',
     color: theme.colors.text.primary,
-    marginBottom: theme.spacing.xs,
+    marginBottom: 4,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -135,29 +146,30 @@ const styles = StyleSheet.create({
   rating: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
   },
   ratingText: {
+    marginLeft: 4,
     fontSize: theme.typography.sizes.small,
+    fontWeight: 'bold',
     color: theme.colors.text.primary,
-    fontWeight: '500',
   },
   reviewCount: {
+    marginLeft: 4,
     fontSize: theme.typography.sizes.small,
     color: theme.colors.text.secondary,
-    marginLeft: theme.spacing.xs,
   },
   verifiedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.colors.success + '15',
     paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
+    paddingVertical: theme.spacing.xs / 2,
     borderRadius: theme.borderRadius.large,
-    gap: 4,
+    flexShrink: 0, // Prevent badge from shrinking
   },
   verifiedText: {
-    fontSize: theme.typography.sizes.caption,
+    marginLeft: 4,
+    fontSize: theme.typography.sizes.small,
     color: theme.colors.success,
     fontWeight: '500',
   },
@@ -165,59 +177,75 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: theme.spacing.md,
-    gap: theme.spacing.xs,
   },
   locationText: {
-    fontSize: theme.typography.sizes.small,
+    marginLeft: theme.spacing.xs,
+    fontSize: theme.typography.sizes.body,
     color: theme.colors.text.secondary,
-    flex: 1,
+    flex: 1, // Take remaining space but allow truncation
   },
   skillsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: theme.spacing.xs,
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
   },
   skillBadge: {
     backgroundColor: theme.colors.earth.clay + '15',
     paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
+    paddingVertical: theme.spacing.xs / 2,
     borderRadius: theme.borderRadius.large,
+    marginRight: theme.spacing.xs,
+    marginBottom: theme.spacing.xs,
+    maxWidth: '30%', // Adjusted from previous value to avoid overflow
   },
   skillText: {
-    fontSize: theme.typography.sizes.caption,
     color: theme.colors.earth.clay,
+    fontSize: theme.typography.sizes.caption,
     fontWeight: '500',
+  },
+  moreSkillsBadge: {
+    backgroundColor: theme.colors.background,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs / 2,
+    borderRadius: theme.borderRadius.large,
+    marginBottom: theme.spacing.xs,
+  },
+  moreSkillsText: {
+    color: theme.colors.text.muted,
+    fontSize: theme.typography.sizes.caption,
   },
   footer: {
     flexDirection: 'row',
-    gap: theme.spacing.sm,
+    justifyContent: 'space-between',
+    marginTop: theme.spacing.sm,
   },
   actionButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.large,
+    backgroundColor: theme.colors.primary + '10',
+    flex: 1,
+    marginRight: theme.spacing.sm,
     justifyContent: 'center',
-    padding: theme.spacing.sm,
-    borderRadius: theme.borderRadius.medium,
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-    gap: theme.spacing.xs,
   },
   actionButtonText: {
-    fontSize: theme.typography.sizes.small,
+    marginLeft: theme.spacing.xs,
     color: theme.colors.primary,
-    fontWeight: '600',
+    fontWeight: '500',
+    fontSize: theme.typography.sizes.small,
   },
   primaryButton: {
     backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+    flex: 1,
+    marginRight: 0,
   },
   primaryButtonText: {
+    marginLeft: theme.spacing.xs,
     color: theme.colors.surface,
+    fontWeight: '500',
     fontSize: theme.typography.sizes.small,
-    fontWeight: '600',
   },
   patternOverlay: {
     position: 'absolute',

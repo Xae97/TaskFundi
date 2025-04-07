@@ -245,7 +245,9 @@ export function CreateJobScreen({ navigation }: Props) {
                   </View>
                   <Switch
                     value={values.isRemote}
-                    onValueChange={(value) => setFieldValue('isRemote', value)}
+                    onValueChange={(value: boolean) => {
+                      setFieldValue('isRemote', value);
+                    }}
                     trackColor={{ false: theme.colors.background, true: theme.colors.accent + '80' }}
                     thumbColor={values.isRemote ? theme.colors.accent : '#f4f3f4'}
                   />

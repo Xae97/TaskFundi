@@ -38,10 +38,10 @@ export function RegisterScreen({ navigation, route }: Props) {
     try {
       setError(null);
       await signUp(values);
-      // Navigate to the appropriate home screen based on role
+      // Navigate to the main tabs
       navigation.reset({
         index: 0,
-        routes: [{ name: role === 'client' ? 'ClientHome' : 'FundiHome' }],
+        routes: [{ name: 'MainTabs' }],
       });
     } catch (error) {
       setError('Registration failed. Please try again.');

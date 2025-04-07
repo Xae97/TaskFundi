@@ -14,8 +14,10 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
 import { theme } from '../theme';
 import { jobService } from '../services/JobService';
+import { chatService } from '../services/ChatService';
 import { JobPost } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { ChatButton } from '../components/chat/ChatButton';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'JobDetails'>;
@@ -52,6 +54,49 @@ export function JobDetailsScreen({ navigation, route }: Props) {
     }, 1500);
   };
 
+  // Handle starting a new chat with the client/fundi
+  const handleStartChat = () => {
+    if (!user || !job) return;
+    
+    // Check if a conversation already exists for this job
+    const conversations = chatService.getConversationsByUserId(user.id);
+    const existingConversation = conversations.find(c => c.jobId === job.id);
+    
+    if (existingConversation) {
+      // Navigate to existing conversation
+      navigation.navigate('ChatDetail', { conversationId: existingConversation.id });
+    } else {
+      // Create a new conversation
+      const newConversation = chatService.createConversation({
+        participants: [
+          {
+            userId: user.id,
+            name: user.name || 'User',
+            role: user.role as 'client' | 'fundi',
+          },
+          {
+            userId: user.id === job.clientId ? 'service-provider-id' : job.clientId,
+            name: user.id === job.clientId ? 'Service Provider' : 'Client',
+            role: user.id === job.clientId ? 'fundi' : 'client',
+          },
+        ],
+        messages: [],
+        lastMessage: {
+          id: '0',
+          senderId: user.id,
+          text: `Hello, I'm interested in discussing the job: ${job.title}`,
+          timestamp: new Date(),
+          read: false,
+        },
+        jobId: job.id,
+        jobTitle: job.title,
+      });
+      
+      // Navigate to the new conversation
+      navigation.navigate('ChatDetail', { conversationId: newConversation.id });
+    }
+  };
+
   if (!job) {
     return (
       <View style={styles.loadingContainer}>
@@ -85,9 +130,17 @@ export function JobDetailsScreen({ navigation, route }: Props) {
           <Ionicons name="arrow-back" size={24} color={theme.colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>Job Details</Text>
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="share-outline" size={24} color={theme.colors.text.primary} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={handleStartChat}
+          >
+            <Ionicons name="chatbubble-outline" size={24} color={theme.colors.text.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Ionicons name="share-outline" size={24} color={theme.colors.text.primary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.scrollView}>
@@ -212,6 +265,13 @@ export function JobDetailsScreen({ navigation, route }: Props) {
       {!isJobOwner && (
         <View style={styles.footer}>
           <TouchableOpacity
+            style={styles.chatButton}
+            onPress={handleStartChat}
+          >
+            <Ionicons name="chatbubble-outline" size={20} color={theme.colors.primary} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity
             style={styles.applyButton}
             onPress={handleApplyForJob}
             disabled={isApplying}
@@ -269,6 +329,9 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.h3,
     fontWeight: '600',
     color: theme.colors.text.primary,
+  },
+  headerActions: {
+    flexDirection: 'row',
   },
   actionButton: {
     width: 40,
@@ -505,9 +568,23 @@ const styles = StyleSheet.create({
     padding: theme.spacing.lg,
     borderTopWidth: 1,
     borderTopColor: theme.colors.background,
+    flexDirection: 'row',
+    alignItems: 'center',
     ...theme.elevation.medium,
   },
+  chatButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing.md,
+  },
   applyButton: {
+    flex: 1,
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.md,

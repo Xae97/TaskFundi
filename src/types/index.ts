@@ -14,6 +14,7 @@ export interface User {
   rating?: number;
   reviews?: Review[];
   isRemoteAvailable?: boolean;
+  bio?: string;
 }
 
 export interface Service {
